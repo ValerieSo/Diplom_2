@@ -1,0 +1,19 @@
+import pytest
+from data.helpers import Generators
+from data.base_api_methods import UserAPI
+
+
+@pytest.fixture(scope='function')
+def registration_user_data():
+    email = Generators.generate_random_email()
+    password = Generators.generate_random_password()
+    name = Generators.generate_random_name()
+    return {"email": email, "password": password, "name": name}
+
+
+@pytest.fixture(scope='function')
+def create_user(registration_user_data):
+    payload = registration_user_data
+    response = UserAPI.response_create_user(payload)
+    access_token = response.json()['accessToken']
+    return payload, access_token
