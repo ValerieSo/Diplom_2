@@ -12,8 +12,10 @@ def registration_user_data():
 
 
 @pytest.fixture(scope='function')
-def create_user(registration_user_data):
+def create_and_delete_user(registration_user_data):
     payload = registration_user_data
     response = UserAPI.response_create_user(payload)
     access_token = response.json()['accessToken']
-    return payload, access_token
+    yield payload, access_token
+    headers = {'Authorization': access_token}
+    UserAPI.delete_user(headers)

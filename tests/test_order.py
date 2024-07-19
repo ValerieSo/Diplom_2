@@ -8,9 +8,9 @@ class TestMakeOrder:
     @allure.title('Проверка создания заказа с валидными ингридиентами авторизованным пользователем')
     @allure.description('Отправляем запрос на создание заказа с валидными ингридиентами, '
                         'в запросе добавляем accessToken в заголовки, ожидаем код 200')
-    def test_make_order_auth_user(self, create_user):
+    def test_make_order_auth_user(self, create_and_delete_user):
         payload = Generators.ingredients_set()
-        access_token = create_user[1]
+        access_token = create_and_delete_user[1]
         headers = {'Authorization': access_token}
         response = OrderAPI.response_make_order(payload, headers)
         actual_result = response.json()["success"]
@@ -35,9 +35,9 @@ class TestMakeOrder:
     @allure.title('Проверка создания заказа без ингридиентов авторизованным пользователем')
     @allure.description('Отправляем запрос на создание заказа, в запросе направляем пустой словарь "ingredients", '
                         'в запросе добавляем accessToken в заголовки, ожидаем код 400')
-    def test_make_order_auth_user_with_empty_ingredients(self, create_user):
+    def test_make_order_auth_user_with_empty_ingredients(self, create_and_delete_user):
         payload = {"ingredients": []}
-        access_token = create_user[1]
+        access_token = create_and_delete_user[1]
         headers = {'Authorization': access_token}
         response = OrderAPI.response_make_order(payload, headers)
         actual_result = response.json()["success"]
@@ -53,9 +53,9 @@ class TestMakeOrder:
     @allure.title('Проверка создания заказа с неверным хешем ингредиентов авторизованным пользователем')
     @allure.description('Отправляем запрос на создание заказа, в запросе направляем словарь "ingredients" с неверным '
                         'хешем ингредиентов, в запросе добавляем accessToken в заголовки, ожидаем код 500')
-    def test_make_order_auth_user_with_incorrect_ingredients(self, create_user):
+    def test_make_order_auth_user_with_incorrect_ingredients(self, create_and_delete_user):
         payload = TestData.INCORRECT_INGREDIENTS
-        access_token = create_user[1]
+        access_token = create_and_delete_user[1]
         headers = {'Authorization': access_token}
         response = OrderAPI.response_make_order(payload, headers)
 
@@ -69,8 +69,8 @@ class TestGetUsersOrders:
     @allure.title('Проверка получения заказов авторизованного пользователя')
     @allure.description('Отправляем запрос на получение заказа, в запросе добавляем accessToken в заголовки, '
                         'ожидаем код 200')
-    def test_get_auth_user_orders(self, create_user):
-        access_token = create_user[1]
+    def test_get_auth_user_orders(self, create_and_delete_user):
+        access_token = create_and_delete_user[1]
         headers = {'Authorization': access_token}
         response = OrderAPI.response_get_user_orders(headers)
         actual_result = response.json()["success"]

@@ -20,13 +20,17 @@ class TestCreateUser:
             (f"Фактические результаты:  статус код {response.status_code}, пользователь создан {actual_result}, "
              f" email пользователя {user_data}. Ожидалось: статус код {StatusCode.OK}, пользователь создан=True, "
              f"email пользователя {payload['email']}")
+        # удаляем тестового пользователя
+        access_token = response.json()['accessToken']
+        headers = {'Authorization': access_token}
+        UserAPI.delete_user(headers)
 
     @allure.title('Проверка создания пользователя с параметрами уже зарегистированного пользователя')
     @allure.description('Создаем пользователя, передав все валидные параметры, снова отправляем запрос на создание '
                         'пользователя с этими данными, ожидаем код 403')
     def test_create_user_with_existing_user_params_forbidden(self, registration_user_data):
         payload = registration_user_data
-        UserAPI.response_create_user(payload)
+        response_1 = UserAPI.response_create_user(payload)
         response_2 = UserAPI.response_create_user(payload)
         actual_result = response_2.json()["success"]
         actual_message = response_2.json()["message"]
@@ -37,6 +41,10 @@ class TestCreateUser:
             (f"Фактические результаты: статус код - {response_2.status_code}, пользователь создан - {actual_result}, "
              f"сообщение - {actual_message}. Ожидалось: статус код - {StatusCode.FORBIDDEN},"
              f"создание пользователя - False, ожидаемое сообщение - {StatusResponse.USER_ALREADY_EXISTS}")
+        # удаляем тестового пользователя
+        access_token = response_1.json()['accessToken']
+        headers = {'Authorization': access_token}
+        UserAPI.delete_user(headers)
 
     @allure.title('Проверка создания пользователя без отправки обязательных параметров')
     @allure.description('Отправляем три запроса на создание пользователя, с помощью параметризации почередно '
@@ -62,8 +70,8 @@ class TestCreateUser:
 class TestLoginUser:
     @allure.title('Проверка авторизации пользователя, при указании всех обязательных полей')
     @allure.description('Совершаем авторизацию, используя тестовые данные в payload, ожидаем код 200')
-    def test_login_user_with_existing_data_ok(self):
-        payload = TestData.TEST_LOGIN_PAYLOAD
+    def test_login_user_with_existing_data_ok(self, create_and_delete_user):
+        payload = create_and_delete_user[0]
         response = UserAPI.response_login_user(payload)
         actual_result = response.json()["success"]
         user_data = response.json()["user"]["email"]
@@ -99,10 +107,10 @@ class TestChangeUserInfo:
     @allure.title('Проверка изменения поля "email" существующего  авторизированного пользователя ')
     @allure.description('Создаем пользователя, добавляем accessToken в заголовки, '
                         'отправляем запрос на изменение поля "email", ожидаем код  200')
-    def test_change_user_email_ok(self, create_user):
-        payload = create_user[0]
+    def test_change_user_email_ok(self, create_and_delete_user):
+        payload = create_and_delete_user[0]
         payload["email"] = Generators.generate_random_email()
-        access_token = create_user[1]
+        access_token = create_and_delete_user[1]
         headers = {'Authorization': access_token}
         response = UserAPI.response_change_user_info(payload, headers)
         actual_result = response.json()["success"]
@@ -119,10 +127,10 @@ class TestChangeUserInfo:
                   'другого существующего пользователя ')
     @allure.description('Создаем пользователя, добавляем accessToken в заголовки, отправляем запрос на изменение '
                         'поля "email",передав email другого существующего пользователя, ожидаем код  403')
-    def test_change_user_email_to_existing_email_forbidden(self, create_user):
-        payload = create_user[0]
+    def test_change_user_email_to_existing_email_forbidden(self, create_and_delete_user):
+        payload = create_and_delete_user[0]
         payload["email"] = TestData.EXISTING_EMAIL
-        access_token = create_user[1]
+        access_token = create_and_delete_user[1]
         headers = {'Authorization': access_token}
         response = UserAPI.response_change_user_info(payload, headers)
         actual_result = response.json()["success"]
@@ -138,10 +146,10 @@ class TestChangeUserInfo:
     @allure.title('Проверка изменения поля "password" существующего  авторизированного пользователя ')
     @allure.description('Создаем пользователя, добавляем accessToken в заголовки, '
                         'отправляем запрос на изменение поля "password", ожидаем код  200')
-    def test_change_user_password(self, create_user):
-        payload = create_user[0]
+    def test_change_user_password(self, create_and_delete_user):
+        payload = create_and_delete_user[0]
         payload["password"] = Generators.generate_random_password()
-        access_token = create_user[1]
+        access_token = create_and_delete_user[1]
         headers = {'Authorization': access_token}
         response = UserAPI.response_change_user_info(payload, headers)
         actual_result = response.json()["success"]
@@ -153,10 +161,10 @@ class TestChangeUserInfo:
     @allure.title('Проверка изменения поля "name" существующего  авторизированного пользователя ')
     @allure.description('Создаем пользователя, добавляем accessToken в заголовки, '
                         'отправляем запрос на изменение поля "name", ожидаем код  200')
-    def test_change_user_name(self, create_user):
-        payload = create_user[0]
+    def test_change_user_name(self, create_and_delete_user):
+        payload = create_and_delete_user[0]
         payload["name"] = Generators.generate_random_name()
-        access_token = create_user[1]
+        access_token = create_and_delete_user[1]
         headers = {'Authorization': access_token}
         response = UserAPI.response_change_user_info(payload, headers)
         actual_result = response.json()["success"]
@@ -171,8 +179,8 @@ class TestChangeUserInfo:
 
     @allure.title('Проверка изменения поля "email" существующего  неавторизированного пользователя')
     @allure.description('Создаем пользователя, отправляем запрос на изменение поля "email", ожидаем код  401')
-    def test_change_unauth_user_email_ok(self, create_user):
-        payload = create_user[0]
+    def test_change_unauth_user_email_ok(self, create_and_delete_user):
+        payload = create_and_delete_user[0]
         payload["email"] = Generators.generate_random_email()
         access_token = None
         headers = {'Authorization': access_token}
@@ -189,8 +197,8 @@ class TestChangeUserInfo:
 
     @allure.title('Проверка изменения поля "password" существующего  неавторизированного пользователя ')
     @allure.description('Создаем пользователя, отправляем запрос на изменение поля "password", ожидаем код  401')
-    def test_change_unauth_user_password_ok(self, create_user):
-        payload = create_user[0]
+    def test_change_unauth_user_password_ok(self, create_and_delete_user):
+        payload = create_and_delete_user[0]
         payload["password"] = Generators.generate_random_password()
         access_token = None
         headers = {'Authorization': access_token}
@@ -207,8 +215,8 @@ class TestChangeUserInfo:
 
     @allure.title('Проверка изменения поля "name" существующего  неавторизированного пользователя ')
     @allure.description('Создаем пользователя, отправляем запрос на изменение поля "name", ожидаем код  401')
-    def test_change_unauth_user_name_ok(self, create_user):
-        payload = create_user[0]
+    def test_change_unauth_user_name_ok(self, create_and_delete_user):
+        payload = create_and_delete_user[0]
         payload["name"] = Generators.generate_random_name()
         access_token = None
         headers = {'Authorization': access_token}

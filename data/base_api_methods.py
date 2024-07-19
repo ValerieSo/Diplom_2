@@ -18,6 +18,10 @@ class UserAPI:
         response = requests.patch(Endpoints.ENDPOINT_CHANGE_USER_INFO, data=payload, headers=headers)
         return response
 
+    @staticmethod
+    def delete_user(headers):
+        requests.delete(Endpoints.ENDPOINT_CHANGE_USER_INFO, headers=headers)
+
 
 class OrderAPI:
     @staticmethod
