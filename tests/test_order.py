@@ -1,6 +1,6 @@
 import allure
 from data.data import StatusCode, StatusResponse, TestData
-from data.base_api_methods import OrderAPI
+from base_api_methods import OrderAPI
 from data.helpers import Generators
 
 
@@ -26,11 +26,10 @@ class TestMakeOrder:
         access_token = None
         headers = {'Authorization': access_token}
         response = OrderAPI.response_make_order(payload, headers)
-        try:
-            assert response.status_code == StatusCode.UNAUTHORIZED, \
+
+        assert response.status_code == StatusCode.UNAUTHORIZED, \
                 f"Результаты: Получен статус код {response.status_code}, Ожидался статус код {StatusCode.UNAUTHORIZED}"
-        except AssertionError as e:
-            print('Известная ошибка:', e)
+        # тест не проходит, ФР не соответствует ОР, указанному в документации
 
     @allure.title('Проверка создания заказа без ингридиентов авторизованным пользователем')
     @allure.description('Отправляем запрос на создание заказа, в запросе направляем пустой словарь "ingredients", '

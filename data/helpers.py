@@ -1,7 +1,7 @@
 import random
 import string
 from faker import Faker
-from data.base_api_methods import OrderAPI
+from base_api_methods import OrderAPI
 import random as r
 
 
@@ -22,6 +22,7 @@ class Generators:
     def generate_random_password():
         password = Generators.generate_random_string(6)
         return password
+
     @staticmethod
     def generate_random_name():
         fake = Faker(locale="ru_Ru")

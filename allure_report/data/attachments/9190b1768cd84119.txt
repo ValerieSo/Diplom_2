@@ -1,4 +1,0 @@
-Известная ошибка: Результаты: Получен статус код 200, Ожидался статус код 401
-assert 200 == 401
- +  where 200 = <Response [200]>.status_code
- +  and   401 = StatusCode.UNAUTHORIZED

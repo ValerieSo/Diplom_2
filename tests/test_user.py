@@ -1,7 +1,7 @@
 import allure
 import pytest
 from data.data import StatusCode, StatusResponse, TestData
-from data.base_api_methods import UserAPI
+from base_api_methods import UserAPI
 from data.helpers import Generators
 
 

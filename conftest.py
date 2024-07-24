@@ -1,6 +1,6 @@
 import pytest
 from data.helpers import Generators
-from data.base_api_methods import UserAPI
+from base_api_methods import UserAPI
 
 
 @pytest.fixture(scope='function')
