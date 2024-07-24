@@ -30,30 +30,6 @@ class Generators:
         return name
 
     @staticmethod
-    def registration_user_data_without_email():
-        fake = Faker(locale="ru_Ru")
-        email = None
-        password = Generators.generate_random_string(6)
-        name = fake.first_name()
-        return {"email": email, "password": password, "name": name}
-
-    @staticmethod
-    def registration_user_data_without_password():
-        fake = Faker(locale="ru_Ru")
-        email = fake.email()
-        password = None
-        name = fake.first_name()
-        return {"email": email, "password": password, "name": name}
-
-    @staticmethod
-    def registration_user_data_without_name():
-        fake = Faker(locale="ru_Ru")
-        email = fake.email()
-        password = Generators.generate_random_string(6)
-        name = None
-        return {"email": email, "password": password, "name": name}
-
-    @staticmethod
     def ingredients_set():
         response = OrderAPI.response_get_ingredients()
         ingredients_data = response.json()["data"]

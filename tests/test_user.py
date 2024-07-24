@@ -49,12 +49,10 @@ class TestCreateUser:
     @allure.title('Проверка создания пользователя без отправки обязательных параметров')
     @allure.description('Отправляем три запроса на создание пользователя, с помощью параметризации почередно '
                         'убираем из запроса параметры "email", "password", "name", в каждом случае ожидаем код 403')
-    @pytest.mark.parametrize('user_reg_data', [
-        Generators.registration_user_data_without_email(),
-        Generators.registration_user_data_without_password(),
-        Generators.registration_user_data_without_name()])
-    def test_create_user_without_required_params_forbidden(self, user_reg_data):
-        payload = user_reg_data
+    @pytest.mark.parametrize('required_param', ["email", "password", "name"])
+    def test_create_user_without_required_params_forbidden(self, required_param, registration_user_data):
+        payload = registration_user_data
+        payload[required_param] = None
         response = UserAPI.response_create_user(payload)
         actual_result = response.json()["success"]
         actual_message = response.json()["message"]
